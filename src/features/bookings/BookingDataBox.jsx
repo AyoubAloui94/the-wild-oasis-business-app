@@ -1,16 +1,11 @@
-import styled from "styled-components";
-import { format, isToday } from "date-fns";
-import {
-  HiOutlineChatBubbleBottomCenterText,
-  HiOutlineCheckCircle,
-  HiOutlineCurrencyDollar,
-  HiOutlineHomeModern,
-} from "react-icons/hi2";
+import styled from "styled-components"
+import { format, isToday } from "date-fns"
+import { HiOutlineChatBubbleBottomCenterText, HiOutlineCheckCircle, HiOutlineCurrencyDollar, HiOutlineHomeModern } from "react-icons/hi2"
 
-import DataItem from "../../ui/DataItem";
-import { Flag } from "../../ui/Flag";
+import DataItem from "../../ui/DataItem"
+import { Flag } from "../../ui/Flag"
 
-import { formatDistanceFromNow, formatCurrency } from "../../utils/helpers";
+import { formatDistanceFromNow, formatCurrency } from "../../utils/helpers"
 
 const StyledBookingDataBox = styled.section`
   /* Box */
@@ -19,7 +14,7 @@ const StyledBookingDataBox = styled.section`
   border-radius: var(--border-radius-md);
 
   overflow: hidden;
-`;
+`
 
 const Header = styled.header`
   background-color: var(--color-brand-500);
@@ -49,11 +44,11 @@ const Header = styled.header`
     font-size: 2rem;
     margin-left: 4px;
   }
-`;
+`
 
 const Section = styled.section`
   padding: 3.2rem 4rem 1.2rem;
-`;
+`
 
 const Guest = styled.div`
   display: flex;
@@ -66,7 +61,7 @@ const Guest = styled.div`
     font-weight: 500;
     color: var(--color-grey-700);
   }
-`;
+`
 
 const Price = styled.div`
   display: flex;
@@ -76,10 +71,8 @@ const Price = styled.div`
   border-radius: var(--border-radius-sm);
   margin-top: 2.4rem;
 
-  background-color: ${(props) =>
-    props.isPaid ? "var(--color-green-100)" : "var(--color-yellow-100)"};
-  color: ${(props) =>
-    props.isPaid ? "var(--color-green-700)" : "var(--color-yellow-700)"};
+  background-color: ${props => (props.$isPaid ? "var(--color-green-100)" : "var(--color-yellow-100)")};
+  color: ${props => (props.$isPaid ? "var(--color-green-700)" : "var(--color-yellow-700)")};
 
   & p:last-child {
     text-transform: uppercase;
@@ -92,14 +85,14 @@ const Price = styled.div`
     width: 2.4rem;
     color: currentColor !important;
   }
-`;
+`
 
 const Footer = styled.footer`
   padding: 1.6rem 4rem;
   font-size: 1.2rem;
   color: var(--color-grey-500);
   text-align: right;
-`;
+`
 
 // A purely presentational component
 function BookingDataBox({ booking }) {
@@ -116,8 +109,8 @@ function BookingDataBox({ booking }) {
     observations,
     isPaid,
     guests: { fullName: guestName, email, country, countryFlag, nationalID },
-    cabins: { name: cabinName },
-  } = booking;
+    cabins: { name: cabinName }
+  } = booking
 
   return (
     <StyledBookingDataBox>
@@ -130,11 +123,7 @@ function BookingDataBox({ booking }) {
         </div>
 
         <p>
-          {format(new Date(startDate), "EEE, MMM dd yyyy")} (
-          {isToday(new Date(startDate))
-            ? "Today"
-            : formatDistanceFromNow(startDate)}
-          ) &mdash; {format(new Date(endDate), "EEE, MMM dd yyyy")}
+          {format(new Date(startDate), "EEE, MMM dd yyyy")} ({isToday(new Date(startDate)) ? "Today" : formatDistanceFromNow(startDate)}) &mdash; {format(new Date(endDate), "EEE, MMM dd yyyy")}
         </p>
       </Header>
 
@@ -151,10 +140,7 @@ function BookingDataBox({ booking }) {
         </Guest>
 
         {observations && (
-          <DataItem
-            icon={<HiOutlineChatBubbleBottomCenterText />}
-            label="Observations"
-          >
+          <DataItem icon={<HiOutlineChatBubbleBottomCenterText />} label="Observations">
             {observations}
           </DataItem>
         )}
@@ -163,14 +149,11 @@ function BookingDataBox({ booking }) {
           {hasBreakfast ? "Yes" : "No"}
         </DataItem>
 
-        <Price isPaid={isPaid}>
+        <Price $isPaid={isPaid}>
           <DataItem icon={<HiOutlineCurrencyDollar />} label={`Total price`}>
             {formatCurrency(totalPrice)}
 
-            {hasBreakfast &&
-              ` (${formatCurrency(cabinPrice)} cabin + ${formatCurrency(
-                extrasPrice
-              )} breakfast)`}
+            {hasBreakfast && ` (${formatCurrency(cabinPrice)} cabin + ${formatCurrency(extrasPrice)} breakfast)`}
           </DataItem>
 
           <p>{isPaid ? "Paid" : "Will pay at property"}</p>
@@ -181,7 +164,7 @@ function BookingDataBox({ booking }) {
         <p>Booked {format(new Date(created_at), "EEE, MMM dd yyyy, p")}</p>
       </Footer>
     </StyledBookingDataBox>
-  );
+  )
 }
 
-export default BookingDataBox;
+export default BookingDataBox
