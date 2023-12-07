@@ -108,7 +108,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
       <FormRow label={"Description for website"} error={errors?.description?.message}>
         <Textarea
-          type="number"
+          type="text"
           id="description"
           disabled={isWorking}
           {...register("description", {

@@ -232,6 +232,13 @@ FOR DARK MODE
 --image-opacity: 90%;
 */
 
+.react-datepicker {
+  font-family: inherit;
+  font-size: 1.2rem;
+  color: inherit;
+ 
+}
+
 `
 
 export default GlobalStyles

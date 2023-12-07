@@ -11,6 +11,17 @@ export async function getCabins() {
   return data
 }
 
+export async function getCabin(id) {
+  const { data, error } = await supabase.from("cabins").select("*").eq("id", id).single()
+
+  if (error) {
+    console.log(error)
+    throw new Error("Error fetching cabin")
+  }
+
+  return data
+}
+
 export async function createEditCabin(newCabin, id) {
   const hasImagePath = typeof newCabin.image === "string"
   // const hasImagePath = newCabin.image.startsWith(supabaseUrl)

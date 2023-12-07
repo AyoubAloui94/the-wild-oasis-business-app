@@ -6,6 +6,9 @@ export function useBookings() {
   const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
 
+  // Get booking for guest in case there is a guest param
+  const guestId = searchParams.get("guest") ? searchParams.get("guest") : undefined
+
   // Filter
   const filterValue = searchParams.get("status")
   const filter = !filterValue || filterValue === "all" ? null : { field: "status", value: filterValue }
@@ -24,8 +27,8 @@ export function useBookings() {
     isLoading,
     error
   } = useQuery({
-    queryKey: ["bookings", filter, sortBy, page],
-    queryFn: () => getBookings({ filter, sortBy, page })
+    queryKey: ["bookings", filter, sortBy, page, guestId],
+    queryFn: () => getBookings({ filter, sortBy, page, guestId })
   })
 
   // Pre-fetching

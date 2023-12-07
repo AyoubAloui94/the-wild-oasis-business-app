@@ -1,8 +1,10 @@
-import { getToday } from "../utils/helpers"
+import { getToday, subtractDates } from "../utils/helpers"
 import supabase from "./supabase"
 
-export async function getBookings({ filter, sortBy, page }) {
-  let query = supabase.from("bookings").select("id,created_at,startDate,endDate,numNights,numGuests,status,totalPrice, cabins(name),guests(fullName,email)", { count: "exact" })
+export async function getBookings({ filter, sortBy, page, guestId = undefined }) {
+  let query = supabase.from("bookings").select("id,created_at,startDate,endDate,numNights,numGuests,status,totalPrice, cabins(name),guests(fullName,email,id)", { count: "exact" })
+
+  if (guestId) query = query.eq("guestId", guestId)
 
   if (filter) query = query.eq(filter.field, filter.value)
 
@@ -103,4 +105,45 @@ export async function deleteBooking(id) {
     throw new Error("Booking could not be deleted")
   }
   return data
+}
+
+export async function createBooking({ data, cabin, breakfastPrice }) {
+  const { dates, numGuests, hasBreakfast, observations, email } = data
+  const { id: cabinId, regularPrice, discount } = cabin
+  const startDate = new Date(dates[0]).toLocaleDateString("fr-CA")
+  const endDate = new Date(dates[1]).toLocaleDateString("fr-CA")
+
+  const { data: guestId, error: userError } = await supabase.from("guests").select("id").eq("email", email).single()
+
+  if (userError) {
+    console.log(userError)
+    throw new Error("No guest associated with that email address. Create guest first and then try again.")
+  }
+
+  // const { data: breakfastPrice, error: settingsError } = await supabase.from("settings").select("breakfastPrice").single()
+
+  // if (settingsError) {
+  //   console.log(settingsError)
+  //   throw new Error("Error fetching breakfast price")
+  // }
+
+  const numNights = subtractDates(endDate, startDate)
+
+  const cabinPrice = numNights * (regularPrice - discount)
+  let extrasPrice
+
+  if (!hasBreakfast) extrasPrice = 0
+  if (hasBreakfast) extrasPrice = breakfastPrice * numGuests * numNights
+
+  const totalPrice = cabinPrice + extrasPrice
+  const newBooking = { startDate, endDate, numNights, numGuests, cabinPrice, extrasPrice, totalPrice, hasBreakfast, observations, guestId: guestId.id, cabinId, status: "unconfirmed" }
+
+  const { data: createdBooking, error: bookingError } = await supabase.from("bookings").insert([newBooking]).select().single()
+
+  if (bookingError) {
+    console.log(bookingError)
+    throw new Error("Booking could not be created")
+  }
+
+  return createdBooking
 }

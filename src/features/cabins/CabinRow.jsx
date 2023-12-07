@@ -2,12 +2,13 @@ import styled from "styled-components"
 import { formatCurrency } from "../../utils/helpers"
 import CreateCabinForm from "./CreateCabinForm"
 import { useDeleteCabin } from "./useDeleteCabin"
-import { HiPencil, HiSquare2Stack, HiTrash } from "react-icons/hi2"
+import { HiCalendar, HiPencil, HiSquare2Stack, HiTrash } from "react-icons/hi2"
 import { useCreateCabin } from "./useCreateCabin"
 import Modal from "../../ui/Modal"
 import ConfirmDelete from "../../ui/ConfirmDelete"
 import Table from "../../ui/Table"
 import Menus from "../../ui/Menus"
+import { useNavigate } from "react-router-dom"
 
 // const TableRow = styled.div`
 //   display: grid;
@@ -58,6 +59,7 @@ const Buttons = styled.div`
 function CabinRow({ cabin }) {
   const { isDeleting, deleteCabin } = useDeleteCabin()
   const { isCreating, createCabin } = useCreateCabin()
+  const navigate = useNavigate()
 
   const { id, name, image, regularPrice, maxCapacity, discount, description } = cabin
 
@@ -84,6 +86,9 @@ function CabinRow({ cabin }) {
           <Menus.Menu>
             <Menus.Toggle id={id} />
             <Menus.List id={id}>
+              <Menus.Button icon={<HiCalendar />} onClick={() => navigate(`/bookings/new/${id}`)}>
+                Book
+              </Menus.Button>
               <Menus.Button icon={<HiSquare2Stack />} onClick={handleDuplicate}>
                 Duplicate
               </Menus.Button>

@@ -17,6 +17,13 @@ const sizes = {
     font-size: 1.6rem;
     padding: 1.2rem 2.4rem;
     font-weight: 500;
+  `,
+  special: css`
+    font-size: 1.4rem;
+    padding: 0.8rem 1.2rem;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-align: center;
   `
 }
 

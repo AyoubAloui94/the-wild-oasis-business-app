@@ -5,7 +5,7 @@ import { cloneElement, createContext, useContext, useState } from "react"
 import { useOutsideClick } from "../hooks/useOutsideClick"
 
 const StyledModal = styled.div`
-  position: fixed;
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -67,7 +67,11 @@ function Modal({ children }) {
 function Open({ children, opens: opensWindowName }) {
   const { open } = useContext(ModalContext)
 
-  return cloneElement(children, { onClick: () => open(opensWindowName) })
+  return cloneElement(children, {
+    onClick: () => {
+      open(opensWindowName)
+    }
+  })
 }
 
 function Window({ name, children }) {
