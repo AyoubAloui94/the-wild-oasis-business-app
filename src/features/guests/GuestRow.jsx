@@ -5,7 +5,7 @@ import Table from "../../ui/Table"
 
 import { formatDistanceFromNow } from "../../utils/helpers"
 import Menus from "../../ui/Menus"
-import { HiArrowDownOnSquare, HiArrowUpOnSquare, HiEye, HiPencil, HiTrash } from "react-icons/hi2"
+import { HiArrowDownOnSquare, HiArrowUpOnSquare, HiEye, HiPencil, HiPencilSquare, HiTrash } from "react-icons/hi2"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 import Modal from "../../ui/Modal"
@@ -43,18 +43,13 @@ const Amount = styled.div`
 
 function GuestRow({ guest = {} }) {
   const navigate = useNavigate()
-  const { id, fullName, email, nationalID, bookings } = guest
-
+  const { id, fullName, email, nationalID, bookings, nationality } = guest
+  console.log(guest)
   const { deleteGuest, isDeleting } = useDeleteGuest()
-  const { cabins } = useCabins()
 
-  let startDate, endDate, numNights, cabinName, bookingId
+  let bookingId
 
   if (bookings.length) {
-    startDate = bookings[0].startDate
-    endDate = bookings[0].endDate
-    numNights = bookings[0].numNights
-    cabinName = cabins.filter(cabin => cabin.id === bookings[0].cabinId)[0].name
     bookingId = bookings[0].id
   }
 
@@ -75,21 +70,8 @@ function GuestRow({ guest = {} }) {
 
       <Stacked>{nationalID}</Stacked>
 
-      <Stacked>
-        {bookings.length ? (
-          <>
-            <span>Cabin: {cabinName}</span>
-            <span>
-              {isToday(new Date(startDate)) ? "Today" : formatDistanceFromNow(startDate)} &rarr; {numNights} night stay
-            </span>
-            <span>
-              {format(new Date(startDate), "MMM dd yyyy")} &mdash; {format(new Date(endDate), "MMM dd yyyy")}
-            </span>
-          </>
-        ) : (
-          <span>--</span>
-        )}
-      </Stacked>
+      <Stacked>{nationality}</Stacked>
+
       <div>
         <Modal>
           <Menus.Menu>
@@ -103,7 +85,7 @@ function GuestRow({ guest = {} }) {
                 ""
               )}
               <Modal.Open opens={"guest-form"}>
-                <Menus.Button icon={<HiPencil />}>Edit</Menus.Button>
+                <Menus.Button icon={<HiPencilSquare />}>Edit</Menus.Button>
               </Modal.Open>
 
               <Modal.Open opens={"delete"}>

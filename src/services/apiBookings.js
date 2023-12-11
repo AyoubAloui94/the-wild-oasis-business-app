@@ -2,7 +2,7 @@ import { getToday, subtractDates } from "../utils/helpers"
 import supabase from "./supabase"
 
 export async function getBookings({ filter, sortBy, page, guestId = undefined }) {
-  let query = supabase.from("bookings").select("id,created_at,startDate,endDate,numNights,numGuests,status,totalPrice, cabins(name),guests(fullName,email,id)", { count: "exact" })
+  let query = supabase.from("bookings").select("id,created_at,observations,startDate,endDate,numNights,numGuests,status,totalPrice,hasBreakfast,cabins(name,id,maxCapacity,regularPrice,discount),guests(fullName,email,id)", { count: "exact" })
 
   if (guestId) query = query.eq("guestId", guestId)
 
@@ -86,16 +86,6 @@ export async function getStaysTodayActivity() {
   return data
 }
 
-export async function updateBooking(id, obj) {
-  const { data, error } = await supabase.from("bookings").update(obj).eq("id", id).select().single()
-
-  if (error) {
-    console.error(error)
-    throw new Error("Booking could not be updated")
-  }
-  return data
-}
-
 export async function deleteBooking(id) {
   // REMEMBER RLS POLICIES
   const { data, error } = await supabase.from("bookings").delete().eq("id", id)
@@ -107,27 +97,24 @@ export async function deleteBooking(id) {
   return data
 }
 
-export async function createBooking({ data, cabin, breakfastPrice }) {
+export async function createBooking(data, cabin, breakfastPrice, id) {
   const { dates, numGuests, hasBreakfast, observations, email } = data
   const { id: cabinId, regularPrice, discount } = cabin
   const startDate = new Date(dates[0]).toLocaleDateString("fr-CA")
   const endDate = new Date(dates[1]).toLocaleDateString("fr-CA")
 
-  const { data: guestId, error: userError } = await supabase.from("guests").select("id").eq("email", email).single()
+  const { data: guest, error: userError } = await supabase.from("guests").select("id").eq("email", email).single()
 
   if (userError) {
     console.log(userError)
     throw new Error("No guest associated with that email address. Create guest first and then try again.")
   }
 
-  // const { data: breakfastPrice, error: settingsError } = await supabase.from("settings").select("breakfastPrice").single()
-
-  // if (settingsError) {
-  //   console.log(settingsError)
-  //   throw new Error("Error fetching breakfast price")
-  // }
+  if (!dates[0] || !dates[1]) throw new Error("Please provide a valid date interval")
 
   const numNights = subtractDates(endDate, startDate)
+
+  if (numNights === 0) throw new Error("Stay should at least last 1 night")
 
   const cabinPrice = numNights * (regularPrice - discount)
   let extrasPrice
@@ -136,9 +123,17 @@ export async function createBooking({ data, cabin, breakfastPrice }) {
   if (hasBreakfast) extrasPrice = breakfastPrice * numGuests * numNights
 
   const totalPrice = cabinPrice + extrasPrice
-  const newBooking = { startDate, endDate, numNights, numGuests, cabinPrice, extrasPrice, totalPrice, hasBreakfast, observations, guestId: guestId.id, cabinId, status: "unconfirmed" }
+  const newBooking = { startDate, endDate, numNights, numGuests, cabinPrice, extrasPrice, totalPrice, hasBreakfast, observations, guestId: guest.id, cabinId, status: "unconfirmed" }
 
-  const { data: createdBooking, error: bookingError } = await supabase.from("bookings").insert([newBooking]).select().single()
+  // const { data: createdBooking, error: bookingError } = await supabase.from("bookings").insert([newBooking]).select().single()
+
+  let query = supabase.from("bookings")
+
+  if (!id) query = query.insert([newBooking])
+  if (id) query = query.update(newBooking).eq("id", id)
+  console.log(id)
+
+  const { data: createdBooking, error: bookingError } = await query.select().single()
 
   if (bookingError) {
     console.log(bookingError)
@@ -146,4 +141,14 @@ export async function createBooking({ data, cabin, breakfastPrice }) {
   }
 
   return createdBooking
+}
+
+export async function updateBooking({ id, obj }) {
+  const { data, error } = await supabase.from("bookings").update(obj).eq("id", id).select().single()
+
+  if (error) {
+    console.error(error)
+    throw new Error("Booking could not be updated")
+  }
+  return data
 }

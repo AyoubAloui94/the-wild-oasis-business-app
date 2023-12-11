@@ -13,12 +13,12 @@ function GuestTable() {
 
   return (
     <Menus>
-      <Table columns="1.6fr 1.6fr 1fr 2fr 0.3fr">
+      <Table columns="1.6fr 1.6fr 1fr 1fr 0.3fr">
         <Table.Header>
           <div>Full Name</div>
           <div>Email address</div>
           <div>National ID</div>
-          <div>Booking</div>
+          <div>Nationality</div>
           <div></div>
         </Table.Header>
         <Table.Body data={guests} render={guest => <GuestRow guest={guest} key={guest.id} />} />

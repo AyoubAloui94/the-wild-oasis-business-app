@@ -101,7 +101,7 @@ function CreateGuestForm({ guestToEdit = {}, onCloseModal }) {
           Cancel
         </Button>
         <Button disabled={isWorking} onClick={handleSubmit(onSubmit, onError)}>
-          {!isWorking ? "Add new guest" : <SpinnerMini />}
+          {isWorking ? <SpinnerMini /> : isEditSession ? "Update guest" : "Add new guest"}
         </Button>
       </FormRow>
     </Form>

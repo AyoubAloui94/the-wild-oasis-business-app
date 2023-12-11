@@ -2,7 +2,7 @@ import styled from "styled-components"
 import { formatCurrency } from "../../utils/helpers"
 import CreateCabinForm from "./CreateCabinForm"
 import { useDeleteCabin } from "./useDeleteCabin"
-import { HiCalendar, HiPencil, HiSquare2Stack, HiTrash } from "react-icons/hi2"
+import { HiCalendar, HiPencil, HiPencilSquare, HiSquare2Stack, HiTrash } from "react-icons/hi2"
 import { useCreateCabin } from "./useCreateCabin"
 import Modal from "../../ui/Modal"
 import ConfirmDelete from "../../ui/ConfirmDelete"
@@ -93,7 +93,7 @@ function CabinRow({ cabin }) {
                 Duplicate
               </Menus.Button>
               <Modal.Open opens={"cabin-form"}>
-                <Menus.Button icon={<HiPencil />}>Edit</Menus.Button>
+                <Menus.Button icon={<HiPencilSquare />}>Edit</Menus.Button>
               </Modal.Open>
               <Modal.Open opens={"delete"}>
                 <Menus.Button icon={<HiTrash />}>Delete</Menus.Button>

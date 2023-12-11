@@ -12,7 +12,7 @@ export async function createGuest(newGuest) {
 }
 
 export async function getGuests() {
-  const { data, error } = await supabase.from("guests").select("fullName,email,id,nationalID,bookings(id,startDate,endDate,numNights,cabinId)")
+  const { data, error } = await supabase.from("guests").select("fullName,email,id,nationalID,nationality,bookings(id,startDate,endDate,numNights,cabinId)")
 
   if (error) {
     console.log(error)

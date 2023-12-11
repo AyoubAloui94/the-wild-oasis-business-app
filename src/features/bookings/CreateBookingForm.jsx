@@ -19,16 +19,8 @@ import SpinnerMini from "../../ui/SpinnerMini"
 import AddGuest from "../guests/AddGuest"
 import { useSearchParams } from "react-router-dom"
 import CabinPreview from "../cabins/CabinPreview"
-
-const Img = styled.img`
-  display: block;
-  width: 7.4rem;
-  aspect-ratio: 3 / 2;
-  object-fit: cover;
-  object-position: center;
-  transform: scale(1.5) translateX(-7px);
-  margin-bottom: 2rem;
-`
+import toast from "react-hot-toast"
+import { useUpdateBooking } from "./useUpdateBooking"
 
 const StyledCheckbox = styled.div`
   display: flex;
@@ -59,15 +51,26 @@ const Label = styled.label`
   font-weight: 500;
 `
 
-function CreateBookingForm({ onCloseModal }) {
-  const { cabin, isLoadingCabin } = useCabin()
+function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin }) {
+  const { id: editId, ...editValues } = bookingToEdit
+  const isEditSession = Boolean(editId)
+
   const { createBooking, isCreating } = useCreateBooking()
   const { settings, isLoading: isLoadingSettings } = useSettings()
+  const { isUpdating, updateBooking } = useUpdateBooking()
 
-  const { register, handleSubmit, reset, getValues, setValue, formState, control } = useForm()
-  const [dateRange, setDateRange] = useState([null, null])
+  const { register, handleSubmit, reset, getValues, setValue, formState, control } = useForm({
+    defaultValues: isEditSession ? { ...editValues, email: editValues.guests.email, dates: new Date() } : {}
+  })
+
+  const [dateRange, setDateRange] = useState(function () {
+    if (editId) setValue("dates", [new Date(editValues.startDate), new Date(editValues.endDate)])
+    return editId ? [new Date(editValues.startDate), new Date(editValues.endDate)] : [null, null]
+  })
   const [startDate, endDate] = dateRange
   const [searchParams] = useSearchParams()
+
+  const isWorking = isCreating || isUpdating
 
   useEffect(
     function () {
@@ -83,13 +86,23 @@ function CreateBookingForm({ onCloseModal }) {
 
   const { errors } = formState
 
-  if (isLoadingCabin || isLoadingSettings) return <Spinner />
-  const { id: cabinId, name: cabinName, image, regularPrice, maxCapacity, discount, description } = cabin
+  if (isLoadingSettings) return <Spinner />
+  const { id: cabinId, name: cabinName, image, regularPrice, maxCapacity, discount } = cabin
   const { breakfastPrice } = settings
 
   function onSubmit(data) {
     console.log(data)
-    createBooking({ data, cabin, breakfastPrice })
+    // if (!data.dates[0] || !data.dates[1]) return toast.error("Please provide a valid date interval")
+
+    if (!editId) createBooking({ data, cabin, breakfastPrice })
+    if (editId) {
+      updateBooking(
+        { data, cabin, breakfastPrice, id: editId },
+        {
+          onSuccess: () => onCloseModal?.()
+        }
+      )
+    }
   }
 
   function onError(errors) {
@@ -98,10 +111,12 @@ function CreateBookingForm({ onCloseModal }) {
 
   return (
     <>
-      <div>
-        <CabinPreview />
-      </div>
-      <Form onSubmit={handleSubmit(onSubmit, onError)} type={"regular"}>
+      {!isEditSession && (
+        <div>
+          <CabinPreview />
+        </div>
+      )}
+      <Form onSubmit={handleSubmit(onSubmit, onError)} type={isEditSession ? "modal" : "regular"}>
         <Controller
           name="dates"
           control={control}
@@ -141,7 +156,7 @@ function CreateBookingForm({ onCloseModal }) {
               }
             })}
           />
-          <AddGuest />
+          {!isEditSession && <AddGuest />}
         </FormRow>
 
         <FormRow label={`Number of guests (${maxCapacity} max)`} error={errors?.numGuests?.message}>
@@ -172,7 +187,7 @@ function CreateBookingForm({ onCloseModal }) {
             Cancel
           </Button>
           {/* <AddGuest /> */}
-          <Button disabled={isCreating}>{!isCreating ? "Create new booking" : <SpinnerMini />}</Button>
+          <Button disabled={isWorking}>{!isWorking ? `${isEditSession ? "Update booking" : "Create new booking"}` : <SpinnerMini />}</Button>
         </FormRow>
       </Form>
     </>
