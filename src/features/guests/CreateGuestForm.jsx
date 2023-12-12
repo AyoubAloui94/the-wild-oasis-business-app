@@ -24,7 +24,7 @@ const StyledSelect = styled.select`
   width: 100%;
 `
 
-function CreateGuestForm({ guestToEdit = {}, onCloseModal }) {
+function CreateGuestForm({ guestToEdit = {}, onCloseModal, isSearchParamsNeeded }) {
   const { id: editId, ...editValues } = guestToEdit
   const isEditSession = Boolean(editId)
   const { register, handleSubmit, reset, getValues, setValue, formState } = useForm({
@@ -56,7 +56,7 @@ function CreateGuestForm({ guestToEdit = {}, onCloseModal }) {
       createGuest(data, {
         onSuccess: () => {
           searchParams.set("email", data.email)
-          setSearchParams(searchParams)
+          if (isSearchParamsNeeded) setSearchParams(searchParams)
           onCloseModal?.()
         }
       })

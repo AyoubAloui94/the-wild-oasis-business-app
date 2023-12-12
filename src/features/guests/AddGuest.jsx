@@ -2,7 +2,7 @@ import Button from "../../ui/Button"
 import Modal from "../../ui/Modal"
 import CreateGuestForm from "./CreateGuestForm"
 
-function AddGuest() {
+function AddGuest({ isSearchParamsNeeded = true }) {
   return (
     <div>
       <Modal>
@@ -10,7 +10,7 @@ function AddGuest() {
           <Button $size={"special"}>Add new guest</Button>
         </Modal.Open>
         <Modal.Window name="guest-form">
-          <CreateGuestForm />
+          <CreateGuestForm isSearchParamsNeeded={isSearchParamsNeeded} />
         </Modal.Window>
       </Modal>
     </div>
