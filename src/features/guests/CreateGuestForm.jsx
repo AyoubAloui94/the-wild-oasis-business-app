@@ -10,10 +10,24 @@ import { useSearchParams } from "react-router-dom"
 import SpinnerMini from "../../ui/SpinnerMini"
 import { useEditGuest } from "./useEditGuest"
 
+import styled from "styled-components"
+import { countryList } from "../../utils/constants"
+
+const StyledSelect = styled.select`
+  font-size: 1.4rem;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid ${props => (props.type === "white" ? "var(--color-grey-100)" : "var(--color-grey-300)")};
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-grey-0);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+`
+
 function CreateGuestForm({ guestToEdit = {}, onCloseModal }) {
   const { id: editId, ...editValues } = guestToEdit
   const isEditSession = Boolean(editId)
-  const { register, handleSubmit, reset, getValues, formState } = useForm({
+  const { register, handleSubmit, reset, getValues, setValue, formState } = useForm({
     defaultValues: isEditSession ? editValues : {}
   })
   const { isCreating, createGuest } = useCreateGuest()
@@ -24,12 +38,12 @@ function CreateGuestForm({ guestToEdit = {}, onCloseModal }) {
   const isWorking = isCreating || isEditing
 
   function onSubmit(data) {
-    console.log(data)
-    const { email, fullName, nationalID, nationality } = data
+    // console.log(data)
+    const { email, fullName, nationalID, nationality, countryFlag } = data
 
     if (editId)
       editGuest(
-        { guest: { fullName, email, nationalID, nationality }, id: editId },
+        { guest: { fullName, email, nationalID, nationality, countryFlag }, id: editId },
         {
           onSuccess: () => {
             reset()
@@ -41,7 +55,7 @@ function CreateGuestForm({ guestToEdit = {}, onCloseModal }) {
     if (!editId)
       createGuest(data, {
         onSuccess: () => {
-          searchParams.set("guest", data.email)
+          searchParams.set("email", data.email)
           setSearchParams(searchParams)
           onCloseModal?.()
         }
@@ -67,7 +81,7 @@ function CreateGuestForm({ guestToEdit = {}, onCloseModal }) {
 
       <FormRow label={"Email"} error={errors?.email?.message}>
         <Input
-          type="email"
+          type="text"
           id="email"
           disabled={isWorking}
           {...register("email", {
@@ -91,10 +105,26 @@ function CreateGuestForm({ guestToEdit = {}, onCloseModal }) {
         />
       </FormRow>
 
-      <FormRow label={"Nationality (optional)"} error={errors?.nationality?.message}>
-        <Input type="text" id="nationality" disabled={isWorking} {...register("nationality")} />
+      <FormRow label={"Nationality"} error={errors?.nationality?.message}>
+        {/* <Input type="text" id="nationality" disabled={isWorking} {...register("nationality")} /> */}
+        <StyledSelect
+          {...register("nationality", {
+            required: "This field is required",
+            onChange: e => {
+              setValue("countryFlag", `https://flagcdn.com/${countryList.find(country => country.name === e.target.value).code.toLowerCase()}.svg`)
+            }
+          })}
+          id="nationality"
+        >
+          <option value={""}>-- Select country --</option>
+          {countryList.map(country => (
+            <option value={country.name} key={country.name}>
+              {country.name}
+            </option>
+          ))}
+        </StyledSelect>
       </FormRow>
-
+      <Input hidden id="countryFlag" {...register("countryFlag")} />
       <FormRow>
         {/* type is an HTML attribute! */}
         <Button $variation="secondary" type="reset" onClick={() => onCloseModal?.()}>

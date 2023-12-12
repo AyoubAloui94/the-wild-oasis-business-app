@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import ReactDatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 
-import { useCabin } from "../cabins/useCabin"
 import { useSettings } from "../settings/useSettings"
 import { useCreateBooking } from "./useCreateBooking"
 
@@ -19,7 +18,6 @@ import SpinnerMini from "../../ui/SpinnerMini"
 import AddGuest from "../guests/AddGuest"
 import { useSearchParams } from "react-router-dom"
 import CabinPreview from "../cabins/CabinPreview"
-import toast from "react-hot-toast"
 import { useUpdateBooking } from "./useUpdateBooking"
 
 const StyledCheckbox = styled.div`
@@ -51,17 +49,31 @@ const Label = styled.label`
   font-weight: 500;
 `
 
-function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin }) {
+const StyledSelect = styled.select`
+  font-size: 1.4rem;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid ${props => (props.type === "white" ? "var(--color-grey-100)" : "var(--color-grey-300)")};
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-grey-0);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+`
+
+function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin = {}, cabins = [] }) {
   const { id: editId, ...editValues } = bookingToEdit
   const isEditSession = Boolean(editId)
 
   const { createBooking, isCreating } = useCreateBooking()
   const { settings, isLoading: isLoadingSettings } = useSettings()
   const { isUpdating, updateBooking } = useUpdateBooking()
+  // const { cabins, isLoading: isLoadingCabins } = useCabins()
 
   const { register, handleSubmit, reset, getValues, setValue, formState, control } = useForm({
     defaultValues: isEditSession ? { ...editValues, email: editValues.guests.email, dates: new Date() } : {}
   })
+
+  const [capacity, setCapacity] = useState("")
+  const [selectedCabinId, setSelectedCabinId] = useState("")
 
   const [dateRange, setDateRange] = useState(function () {
     if (editId) setValue("dates", [new Date(editValues.startDate), new Date(editValues.endDate)])
@@ -70,14 +82,15 @@ function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin }) {
   const [startDate, endDate] = dateRange
   const [searchParams] = useSearchParams()
 
+  const isLoading = isLoadingSettings
   const isWorking = isCreating || isUpdating
 
   useEffect(
     function () {
       let defaultValues = {}
-      if (searchParams.get("guest")) {
+      if (searchParams.get("email")) {
         if (getValues().dates?.length) defaultValues.dates = getValues().dates
-        defaultValues.email = searchParams.get("guest").replace("%40", "@")
+        defaultValues.email = searchParams.get("email").replace("%40", "@")
         reset({ ...defaultValues })
       }
     },
@@ -86,15 +99,32 @@ function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin }) {
 
   const { errors } = formState
 
-  if (isLoadingSettings) return <Spinner />
+  useEffect(
+    function () {
+      if (cabin?.id) setCapacity(cabin.maxCapacity)
+      if (!cabin?.id) {
+        if (!selectedCabinId) setCapacity(cabins[0].maxCapacity)
+        if (selectedCabinId) setCapacity(cabins.find(cabin => cabin.id === Number(selectedCabinId)).maxCapacity)
+      }
+    },
+    [cabin, selectedCabinId, cabins, capacity]
+  )
+
+  if (isLoading) return <Spinner />
+
   const { id: cabinId, name: cabinName, image, regularPrice, maxCapacity, discount } = cabin
+  const isCabinSelected = Boolean(cabinId)
   const { breakfastPrice } = settings
 
   function onSubmit(data) {
     console.log(data)
     // if (!data.dates[0] || !data.dates[1]) return toast.error("Please provide a valid date interval")
 
-    if (!editId) createBooking({ data, cabin, breakfastPrice })
+    if (!editId && isCabinSelected) createBooking({ data, cabin, breakfastPrice })
+    if (!editId && !isCabinSelected) {
+      const selectedCabin = cabins.find(cabin => cabin.id === Number(data.cabinId))
+      createBooking({ data, cabin: selectedCabin, breakfastPrice })
+    }
     if (editId) {
       updateBooking(
         { data, cabin, breakfastPrice, id: editId },
@@ -111,12 +141,32 @@ function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin }) {
 
   return (
     <>
-      {!isEditSession && (
+      {!isEditSession && isCabinSelected && (
         <div>
           <CabinPreview />
         </div>
       )}
-      <Form onSubmit={handleSubmit(onSubmit, onError)} type={isEditSession ? "modal" : "regular"}>
+      <Form onSubmit={handleSubmit(onSubmit, onError)} type={isEditSession ? "modal" : isCabinSelected ? "regular" : "modal"}>
+        {!isEditSession && !isCabinSelected && (
+          <FormRow label={"Cabin"}>
+            <StyledSelect
+              defaultValue={cabins[0].id}
+              id={"cabinId"}
+              {...register("cabinId", {
+                required: "This field is required",
+                onChange: e => {
+                  setSelectedCabinId(e.target.value)
+                }
+              })}
+            >
+              {cabins.map(cabin => (
+                <option key={cabin.id} value={cabin.id}>
+                  {cabin.name} &mdash; {cabin.maxCapacity} people max
+                </option>
+              ))}
+            </StyledSelect>
+          </FormRow>
+        )}
         <Controller
           name="dates"
           control={control}
@@ -146,7 +196,7 @@ function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin }) {
 
         <FormRow label={"Guest email"} error={errors?.email?.message}>
           <Input
-            type="email"
+            type="text"
             id="email"
             {...register("email", {
               required: "This field is required",
@@ -159,13 +209,13 @@ function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin }) {
           {!isEditSession && <AddGuest />}
         </FormRow>
 
-        <FormRow label={`Number of guests (${maxCapacity} max)`} error={errors?.numGuests?.message}>
+        <FormRow label={`Number of guests (${capacity} max)`} error={errors?.numGuests?.message}>
           <Input
             type="number"
             id="numGuests"
             {...register("numGuests", {
               required: "This field is required",
-              validate: value => (value <= maxCapacity && value > 0) || `Maximum number of guests for this cabin is ${maxCapacity}`
+              validate: value => (value <= capacity && value > 0) || `Maximum number of guests for this cabin is ${capacity}`
             })}
           />
         </FormRow>

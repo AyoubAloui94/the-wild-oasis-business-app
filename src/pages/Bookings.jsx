@@ -1,3 +1,4 @@
+import AddBooking from "../features/bookings/AddBooking"
 import BookingTable from "../features/bookings/BookingTable"
 import BookingTableOperations from "../features/bookings/BookingTableOperations"
 
@@ -11,8 +12,10 @@ function Bookings() {
         <Heading as="h1">All bookings</Heading>
         <BookingTableOperations />
       </Row>
-
-      <BookingTable />
+      <Row>
+        <BookingTable />
+      </Row>
+      <AddBooking />
     </>
   )
 }

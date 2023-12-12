@@ -81,7 +81,9 @@ function Window({ name, children }) {
 
   return createPortal(
     <Overlay>
-      <StyledModal ref={ref}>
+      {/* temp fix for 2 open modal windows */}
+      {/* <StyledModal ref={ref}> */}
+      <StyledModal>
         <Button onClick={close}>
           <HiXMark />
         </Button>

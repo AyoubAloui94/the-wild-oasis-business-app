@@ -17,6 +17,7 @@ import { useDeleteBooking } from "./useDeleteBooking"
 import Modal from "../../ui/Modal"
 import ConfirmDelete from "../../ui/ConfirmDelete"
 import Empty from "../../ui/Empty"
+import CreateBookingForm from "./CreateBookingForm"
 
 const HeadingGroup = styled.div`
   display: flex;
@@ -63,6 +64,14 @@ function BookingDetail() {
             Check out
           </Button>
         )}
+        <Modal>
+          <Modal.Open opens={"update"}>
+            <Button $variation="edit">Edit</Button>
+          </Modal.Open>
+          <Modal.Window name={"update"}>
+            <CreateBookingForm bookingToEdit={booking} cabin={booking.cabins} />
+          </Modal.Window>
+        </Modal>
         <Modal>
           <Modal.Open opens={"delete"}>
             <Button $variation="danger">Delete</Button>

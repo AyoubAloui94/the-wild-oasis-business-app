@@ -1,16 +1,13 @@
 import styled from "styled-components"
-import { format, isToday } from "date-fns"
 
 import Table from "../../ui/Table"
 
-import { formatDistanceFromNow } from "../../utils/helpers"
 import Menus from "../../ui/Menus"
-import { HiArrowDownOnSquare, HiArrowUpOnSquare, HiEye, HiPencil, HiPencilSquare, HiTrash } from "react-icons/hi2"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { HiEye, HiPencilSquare, HiTrash } from "react-icons/hi2"
+import { useNavigate } from "react-router-dom"
 
 import Modal from "../../ui/Modal"
 import ConfirmDelete from "../../ui/ConfirmDelete"
-import { useCabins } from "../cabins/useCabins"
 import { useDeleteGuest } from "./useDeleteGuest"
 import CreateGuestForm from "./CreateGuestForm"
 
@@ -36,15 +33,9 @@ const Stacked = styled.div`
   }
 `
 
-const Amount = styled.div`
-  font-family: "Sono";
-  font-weight: 500;
-`
-
 function GuestRow({ guest = {} }) {
   const navigate = useNavigate()
   const { id, fullName, email, nationalID, bookings, nationality } = guest
-  console.log(guest)
   const { deleteGuest, isDeleting } = useDeleteGuest()
 
   let bookingId

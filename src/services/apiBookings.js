@@ -131,7 +131,6 @@ export async function createBooking(data, cabin, breakfastPrice, id) {
 
   if (!id) query = query.insert([newBooking])
   if (id) query = query.update(newBooking).eq("id", id)
-  console.log(id)
 
   const { data: createdBooking, error: bookingError } = await query.select().single()
 
