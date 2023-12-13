@@ -9,7 +9,7 @@ import Button from "../../ui/Button"
 import ButtonText from "../../ui/ButtonText"
 
 import { useMoveBack } from "../../hooks/useMoveBack"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useBooking } from "./useBooking"
 import Spinner from "../../ui/Spinner"
 import { useCheckout } from "../check-in-out/useCheckout"
@@ -18,6 +18,7 @@ import Modal from "../../ui/Modal"
 import ConfirmDelete from "../../ui/ConfirmDelete"
 import Empty from "../../ui/Empty"
 import CreateBookingForm from "./CreateBookingForm"
+import { useSettings } from "../settings/useSettings"
 
 const HeadingGroup = styled.div`
   display: flex;
@@ -26,13 +27,14 @@ const HeadingGroup = styled.div`
 `
 
 function BookingDetail() {
-  const { booking, isLoading } = useBooking()
+  const { booking, isLoading: isLoading1 } = useBooking()
+  const { settings, isLoading: isLoading2 } = useSettings()
   const { checkout, isCheckingOut } = useCheckout()
   const { deleteBooking, isDeleting } = useDeleteBooking()
   const navigate = useNavigate()
   const moveBack = useMoveBack()
 
-  if (isLoading) return <Spinner />
+  if (isLoading1 || isLoading2) return <Spinner />
   if (!booking) return <Empty resourceName={"booking"} />
 
   const { status, id: bookingId } = booking
@@ -51,7 +53,7 @@ function BookingDetail() {
         </HeadingGroup>
         <ButtonText onClick={moveBack}>&larr; Back</ButtonText>
       </Row>
-      <BookingDataBox booking={booking} />
+      <BookingDataBox booking={booking} breakfastPrice={settings.breakfastPrice} />
 
       <ButtonGroup>
         {status === "unconfirmed" && (

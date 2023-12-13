@@ -6,6 +6,10 @@ import DataItem from "../../ui/DataItem"
 import { Flag } from "../../ui/Flag"
 
 import { formatDistanceFromNow, formatCurrency } from "../../utils/helpers"
+import { PDFDownloadLink } from "@react-pdf/renderer"
+import PdfInvoice from "../../ui/PdfInvoice"
+import Button from "../../ui/Button"
+import SpinnerMini from "../../ui/SpinnerMini"
 
 const StyledBookingDataBox = styled.section`
   /* Box */
@@ -88,14 +92,16 @@ const Price = styled.div`
 `
 
 const Footer = styled.footer`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 1.6rem 4rem;
   font-size: 1.2rem;
   color: var(--color-grey-500);
-  text-align: right;
 `
 
 // A purely presentational component
-function BookingDataBox({ booking }) {
+function BookingDataBox({ booking, breakfastPrice }) {
   const {
     created_at,
     startDate,
@@ -161,6 +167,15 @@ function BookingDataBox({ booking }) {
       </Section>
 
       <Footer>
+        {isPaid ? (
+          <PDFDownloadLink document={<PdfInvoice booking={booking} breakfastPrice={breakfastPrice} />} fileName={`booking #${booking.id} - ${guestName}.pdf`}>
+            {({ blob, url, loading, error }) => {
+              return <Button $size={"small"}>{loading ? <SpinnerMini /> : "Get invoice"}</Button>
+            }}
+          </PDFDownloadLink>
+        ) : (
+          <div></div>
+        )}
         <p>Booked {format(new Date(created_at), "EEE, MMM dd yyyy, p")}</p>
       </Footer>
     </StyledBookingDataBox>
