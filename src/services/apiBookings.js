@@ -142,7 +142,7 @@ export async function createBooking(data, cabin, breakfastPrice, id) {
   return createdBooking
 }
 
-export async function updateBooking({ id, obj }) {
+export async function updateBooking(id, obj) {
   const { data, error } = await supabase.from("bookings").update(obj).eq("id", id).select().single()
 
   if (error) {
