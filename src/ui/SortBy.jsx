@@ -11,7 +11,7 @@ function SortBy({ options }) {
     setSearchParams(searchParams)
   }
 
-  return <Select options={options} value={sortBy} type={"white"} onChange={handleChange} />
+  return <Select options={options} value={sortBy} type={"white"} onChange={handleChange} id={"sort"} />
 }
 
 export default SortBy
