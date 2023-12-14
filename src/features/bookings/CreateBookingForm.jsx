@@ -1,6 +1,6 @@
 import styled from "styled-components"
 import { Controller, useForm } from "react-hook-form"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import ReactDatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 
@@ -19,6 +19,7 @@ import AddGuest from "../guests/AddGuest"
 import { useSearchParams } from "react-router-dom"
 import CabinPreview from "../cabins/CabinPreview"
 import { useUpdateBooking } from "./useUpdateBooking"
+import { subDays } from "date-fns"
 
 const StyledCheckbox = styled.div`
   display: flex;
@@ -74,6 +75,7 @@ function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin = {}, cabin
 
   const [capacity, setCapacity] = useState("")
   const [selectedCabinId, setSelectedCabinId] = useState("")
+  const [selectedCabinExludedDates, setSelectedCabinExcludedDates] = useState(null)
 
   const [dateRange, setDateRange] = useState(function () {
     if (editId) setValue("dates", [new Date(editValues.startDate), new Date(editValues.endDate)])
@@ -103,11 +105,27 @@ function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin = {}, cabin
     function () {
       if (cabin?.id) setCapacity(cabin.maxCapacity)
       if (!cabin?.id) {
-        if (!selectedCabinId) setCapacity(cabins[0].maxCapacity)
-        if (selectedCabinId) setCapacity(cabins.find(cabin => cabin.id === Number(selectedCabinId)).maxCapacity)
+        if (!selectedCabinId) {
+          setCapacity(cabins[0].maxCapacity)
+          setSelectedCabinExcludedDates(
+            cabins[0].bookings.map(booking => {
+              return { start: new Date(booking.startDate), end: subDays(new Date(booking.endDate), 1) }
+            })
+          )
+        }
+        if (selectedCabinId) {
+          setCapacity(cabins.find(cabin => cabin.id === Number(selectedCabinId)).maxCapacity)
+          setSelectedCabinExcludedDates(
+            cabins
+              .find(cabin => cabin.id === Number(selectedCabinId))
+              .bookings.map(booking => {
+                return { start: new Date(booking.startDate), end: subDays(new Date(booking.endDate), 1) }
+              })
+          )
+        }
       }
     },
-    [cabin, selectedCabinId, cabins, capacity]
+    [selectedCabinId, cabins, capacity, cabin]
   )
 
   if (isLoading) return <Spinner />
@@ -115,6 +133,14 @@ function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin = {}, cabin
   const { id: cabinId, name: cabinName, image, regularPrice, maxCapacity, discount } = cabin
   const isCabinSelected = Boolean(cabinId)
   const { breakfastPrice } = settings
+
+  let excludedDates
+
+  if (isCabinSelected || isEditSession) {
+    excludedDates = cabin.bookings.map(booking => {
+      return { start: new Date(booking.startDate), end: subDays(new Date(booking.endDate), 1) }
+    })
+  }
 
   function onSubmit(data) {
     console.log(data)
@@ -175,6 +201,7 @@ function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin = {}, cabin
               <FormRow label={"Checkin - Checkout"}>
                 <ReactDatePicker
                   required
+                  excludeDateIntervals={excludedDates || selectedCabinExludedDates}
                   minDate={new Date()}
                   autoComplete="off"
                   id="dates"

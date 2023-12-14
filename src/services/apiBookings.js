@@ -2,7 +2,7 @@ import { getToday, subtractDates } from "../utils/helpers"
 import supabase from "./supabase"
 
 export async function getBookings({ filter, sortBy, page, guestId = undefined }) {
-  let query = supabase.from("bookings").select("id,created_at,observations,startDate,endDate,numNights,numGuests,status,totalPrice,hasBreakfast,cabins(name,id,maxCapacity,regularPrice,discount),guests(fullName,email,id)", { count: "exact" })
+  let query = supabase.from("bookings").select("id,created_at,observations,startDate,endDate,numNights,numGuests,status,totalPrice,hasBreakfast,cabins(name,id,maxCapacity,regularPrice,discount,bookings(startDate,endDate)),guests(fullName,email,id)", { count: "exact" })
 
   if (guestId) query = query.eq("guestId", guestId)
 
@@ -27,7 +27,7 @@ export async function getBookings({ filter, sortBy, page, guestId = undefined })
 }
 
 export async function getBooking(id) {
-  const { data, error } = await supabase.from("bookings").select("*, cabins(*), guests(*)").eq("id", id).maybeSingle()
+  const { data, error } = await supabase.from("bookings").select("*, cabins(*,bookings(startDate,endDate)), guests(*)").eq("id", id).maybeSingle()
 
   if (error) {
     console.error(error)

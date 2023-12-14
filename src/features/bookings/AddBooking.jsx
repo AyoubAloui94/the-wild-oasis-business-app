@@ -15,7 +15,7 @@ function AddBooking() {
           <Button>Add new booking</Button>
         </Modal.Open>
         <Modal.Window name="booking-form">
-          <CreateBookingForm cabins={cabins} />
+          <CreateBookingForm cabins={cabins} cabin={{}} />
         </Modal.Window>
       </Modal>
     </div>

@@ -1,7 +1,7 @@
 import supabase from "./supabase"
 
 export async function getCabins() {
-  const { data, error } = await supabase.from("cabins").select("*")
+  const { data, error } = await supabase.from("cabins").select("id,created_at,discount,regularPrice,maxCapacity,name,description,image,bookings(startDate,endDate,numNights)")
 
   if (error) {
     console.log(error)
@@ -12,7 +12,7 @@ export async function getCabins() {
 }
 
 export async function getCabin(id) {
-  const { data, error } = await supabase.from("cabins").select("*").eq("id", id).single()
+  const { data, error } = await supabase.from("cabins").select("id,created_at,discount,regularPrice,maxCapacity,name,description,image,bookings(startDate,endDate,numNights)").eq("id", id).single()
 
   if (error) {
     console.log(error)
