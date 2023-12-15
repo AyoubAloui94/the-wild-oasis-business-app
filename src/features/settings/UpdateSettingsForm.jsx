@@ -31,6 +31,7 @@ function UpdateSettingsForm() {
       <FormRow label="Breakfast price">
         <Input min={1} type="number" id="breakfast-price" defaultValue={breakfastPrice} disabled={isUpdating} onBlur={e => handleUpdate(e, "breakfastPrice")} />
       </FormRow>
+      <div></div>
     </Form>
   )
 }

@@ -8,6 +8,8 @@ import Button from "../../ui/Button"
 import FileInput from "../../ui/FileInput"
 import Textarea from "../../ui/Textarea"
 import FormRow from "../../ui/FormRow"
+import { useSettings } from "../settings/useSettings"
+import Spinner from "../../ui/Spinner"
 
 function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   const { id: editId, ...editValues } = cabinToEdit
@@ -19,6 +21,10 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
   const { isCreating, createCabin } = useCreateCabin()
   const { isEditing, editCabin } = useEditCabin()
+  const {
+    isLoading,
+    settings: { maxGuestsPerBooking }
+  } = useSettings()
 
   const isWorking = isCreating || isEditing
 
@@ -51,6 +57,9 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
     console.log(errors)
   }
 
+  if (isLoading) return <Spinner />
+  console.log(maxGuestsPerBooking)
+
   return (
     <Form onSubmit={handleSubmit(onSubmit, onError)} type={onCloseModal ? "modal" : "regular"}>
       <FormRow label={"Cabin name"} error={errors?.name?.message}>
@@ -65,6 +74,8 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
       <FormRow label={"Maximum capacity"} error={errors?.maxCapacity?.message}>
         <Input
+          min={1}
+          max={maxGuestsPerBooking}
           type="number"
           id="maxCapacity"
           disabled={isWorking}
@@ -73,6 +84,10 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
             min: {
               value: 1,
               message: "Capacity should be at least 1"
+            },
+            max: {
+              value: maxGuestsPerBooking,
+              message: "Capacity cannot exceed maximum set in settings"
             }
           })}
         />
@@ -80,6 +95,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
       <FormRow label={"Regular price"} error={errors?.regularPrice?.message}>
         <Input
+          min={1}
           type="number"
           id="regularPrice"
           disabled={isWorking}
@@ -95,6 +111,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
       <FormRow label={"Discount"} error={errors?.discount?.message}>
         <Input
+          min={0}
           type="number"
           id="discount"
           disabled={isWorking}
