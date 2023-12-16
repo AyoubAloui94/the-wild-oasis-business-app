@@ -21,10 +21,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
   const { isCreating, createCabin } = useCreateCabin()
   const { isEditing, editCabin } = useEditCabin()
-  const {
-    isLoading,
-    settings: { maxGuestsPerBooking }
-  } = useSettings()
+  const { isLoading, settings } = useSettings()
 
   const isWorking = isCreating || isEditing
 
@@ -58,7 +55,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   }
 
   if (isLoading) return <Spinner />
-  console.log(maxGuestsPerBooking)
+  // console.log(settings)
 
   return (
     <Form onSubmit={handleSubmit(onSubmit, onError)} type={onCloseModal ? "modal" : "regular"}>
@@ -75,7 +72,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
       <FormRow label={"Maximum capacity"} error={errors?.maxCapacity?.message}>
         <Input
           min={1}
-          max={maxGuestsPerBooking}
+          max={settings.maxGuestsPerBooking}
           type="number"
           id="maxCapacity"
           disabled={isWorking}
@@ -86,7 +83,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
               message: "Capacity should be at least 1"
             },
             max: {
-              value: maxGuestsPerBooking,
+              value: settings.maxGuestsPerBooking,
               message: "Capacity cannot exceed maximum set in settings"
             }
           })}
