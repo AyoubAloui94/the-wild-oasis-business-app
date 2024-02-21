@@ -7,7 +7,9 @@ function AddGuest({ isSearchParamsNeeded = true }) {
     <div>
       <Modal>
         <Modal.Open opens="guest-form">
-          <Button $size={"special"}>Add new guest</Button>
+          <Button $size={"special"} type="button">
+            Add new guest
+          </Button>
         </Modal.Open>
         <Modal.Window name="guest-form">
           <CreateGuestForm isSearchParamsNeeded={isSearchParamsNeeded} />
