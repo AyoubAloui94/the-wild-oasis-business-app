@@ -182,6 +182,7 @@ function CreateBookingForm({ onCloseModal, bookingToEdit = {}, cabin = {}, cabin
                 required: "This field is required",
                 onChange: e => {
                   setSelectedCabinId(e.target.value)
+                  setDateRange([null, null])
                 }
               })}
             >
