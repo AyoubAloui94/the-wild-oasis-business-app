@@ -12,6 +12,7 @@ export async function getSettings() {
 
 // We expect a newSetting object that looks like {setting: newValue}
 export async function updateSetting(newSetting) {
+  console.log(newSetting)
   const { data, error } = await supabase
     .from("settings")
     .update(newSetting)
