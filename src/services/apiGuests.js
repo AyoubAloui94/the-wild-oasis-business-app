@@ -28,7 +28,7 @@ export async function deleteGuest(id) {
 
   if (error) {
     console.error(error)
-    throw new Error("Booking could not be deleted")
+    throw new Error("Guest could not be deleted")
   }
   return data
 }
